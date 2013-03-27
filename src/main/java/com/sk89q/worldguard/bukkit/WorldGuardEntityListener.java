@@ -867,6 +867,7 @@ public class WorldGuardEntityListener implements Listener {
         Entity ent = event.getEntity();
         Block block = event.getBlock();
         Location location = block.getLocation();
+        World world = location.getWorld();
 
         ConfigurationManager cfg = plugin.getGlobalStateManager();
         WorldConfiguration wcfg = cfg.get(ent.getWorld());
@@ -891,6 +892,14 @@ public class WorldGuardEntityListener implements Listener {
             if (wcfg.blockZombieDoorDestruction) {
                 event.setCancelled(true);
                 return;
+            }
+
+            if (wcfg.useRegions) {
+                RegionManager mgr = plugin.getGlobalRegionManager().get(world);
+                if (!mgr.getApplicableRegions(toVector(block)).allows(DefaultFlag.MOB_DOOR_BREAK)) {
+                    event.setCancelled(true);
+                    return;
+                }
             }
         }
     }
