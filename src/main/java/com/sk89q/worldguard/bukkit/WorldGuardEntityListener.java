@@ -645,6 +645,17 @@ public class WorldGuardEntityListener implements Listener {
                     event.setCancelled(true);
                     return;
                 }
+
+                if (wcfg.useRegions) {
+                    RegionManager mgr = plugin.getGlobalRegionManager().get(world);
+
+                    for (Block block : event.blockList()) {
+                        if (!mgr.getApplicableRegions(toVector(block)).allows(DefaultFlag.WITHER_SKULL_BLOCK_DAMAGE)) {
+                            event.blockList().clear();
+                            return;
+                        }
+                    }
+                }
             } else {
                 if (wcfg.blockFireballBlockDamage) {
                     event.blockList().clear();
@@ -655,19 +666,19 @@ public class WorldGuardEntityListener implements Listener {
                     event.setCancelled(true);
                     return;
                 }
-            }
-            // allow wither skull blocking since there is no dedicated flag atm
-            if (wcfg.useRegions) {
-                RegionManager mgr = plugin.getGlobalRegionManager().get(world);
 
-                for (Block block : event.blockList()) {
-                    if (!mgr.getApplicableRegions(toVector(block)).allows(DefaultFlag.GHAST_FIREBALL)) {
-                        event.setCancelled(true);
-                        return;
-                    } else if (!mgr.getApplicableRegions(toVector(block))
-                            .allows(DefaultFlag.GHAST_FIREBALL_BLOCK_DAMAGE)) {
-                        event.blockList().clear();
-                        return;
+                if (wcfg.useRegions) {
+                    RegionManager mgr = plugin.getGlobalRegionManager().get(world);
+
+                    for (Block block : event.blockList()) {
+                        if (!mgr.getApplicableRegions(toVector(block)).allows(DefaultFlag.GHAST_FIREBALL)) {
+                            event.setCancelled(true);
+                            return;
+                        } else if (!mgr.getApplicableRegions(toVector(block))
+                                .allows(DefaultFlag.GHAST_FIREBALL_BLOCK_DAMAGE)) {
+                            event.blockList().clear();
+                            return;
+                        }
                     }
                 }
             }
@@ -680,6 +691,16 @@ public class WorldGuardEntityListener implements Listener {
             if (wcfg.blockWitherExplosions) {
                 event.setCancelled(true);
                 return;
+            }
+
+            if (wcfg.useRegions) {
+                RegionManager mgr = plugin.getGlobalRegionManager().get(world);
+                for (Block block : event.blockList()) {
+                    if (!mgr.getApplicableRegions(toVector(block)).allows(DefaultFlag.WITHER_BLOCK_DAMAGE)) {
+                        event.blockList().clear();
+                        return;
+                    }
+                }
             }
         } else {
             // unhandled entity
@@ -887,6 +908,14 @@ public class WorldGuardEntityListener implements Listener {
             if (wcfg.blockWitherBlockDamage || wcfg.blockWitherExplosions) {
                 event.setCancelled(true);
                 return;
+            }
+
+            if (wcfg.useRegions) {
+                RegionManager mgr = plugin.getGlobalRegionManager().get(world);
+                if (!mgr.getApplicableRegions(toVector(block)).allows(DefaultFlag.WITHER_BLOCK_DAMAGE)) {
+                    event.setCancelled(true);
+                    return;
+                }
             }
         } else if (/*ent instanceof Zombie && */event instanceof EntityBreakDoorEvent) {
             if (wcfg.blockZombieDoorDestruction) {
